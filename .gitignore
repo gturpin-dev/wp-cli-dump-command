@@ -1,0 +1,4 @@
+.wp-env.json
+.vscode
+node_modules
+vendor
