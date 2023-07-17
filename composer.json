@@ -1,0 +1,17 @@
+{
+	"$schema": "https://json-schema.org/draft-04/schema#",
+    "name": "gturpin/wp-cli-dump-command",
+    "type": "wordpress-plugin",
+    "autoload": {
+        "psr-4": {
+            "WPCLI_DumpCommand\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Guillaume TURPIN",
+			"homepage": "https://github.com/gturpin-dev"
+        }
+    ],
+    "require": {}
+}

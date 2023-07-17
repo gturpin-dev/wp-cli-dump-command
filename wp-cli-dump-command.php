@@ -23,12 +23,53 @@
  * Domain Path:       /languages
  */
 
+use WPCLI_DumpCommand\WPCLI_Dump;
+
 // Standard plugin security, keep this line in place.
 defined( 'ABSPATH' ) || die();
 
-// Bail if WP-CLI is not present because the plugin work only with WP-CLI
-if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) return;
+// Load autoloader
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
 
-require_once 'WP_CLI_Dump_Command.php';
+// Add option page with hello world inside
+add_action( 'admin_menu', function () {
 
-\WP_CLI::add_command( 'dump', 'WP_CLI_Dump_Command' );
+	// Create a custom option page in admin menu
+	add_menu_page(
+		__( 'Custom Dumps', 'wp-cli-dump-command' ),
+		__( 'Custom Dumps', 'wp-cli-dump-command' ),
+		'manage_options',
+		'wp-cli-dump-command',
+		function () {
+			echo '<h1>' . esc_html( get_admin_page_title() ) . '</h1>';
+
+			// Getting all files in the dump directory
+			$dump_dir_path = WP_CONTENT_DIR . '/dumps';
+
+			if ( file_exists( $dump_dir_path ) ) {
+				$files = scandir( $dump_dir_path );
+				$files = array_diff( $files, [ '.', '..' ] );
+
+				if ( ! empty( $files ) ) {
+					echo '<ul>';
+
+					foreach ( $files as $file ) {
+						$file_url = WP_CONTENT_URL . '/dumps/' . $file;
+						echo '<li><a href="' . esc_url( $file_url ) . '">' . esc_html( $file ) . '</a></li>';
+					}
+
+					echo '</ul>';
+				}
+			}
+		},
+		'dashicons-database-export',
+		85
+	);
+} );
+
+// Need WP-CLI to register the commands
+if ( ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+	\WP_CLI::add_command( 'dump', WPCLI_Dump::class );
+}

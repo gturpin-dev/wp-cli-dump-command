@@ -1,9 +1,14 @@
 <?php
 
+namespace WPCLI_DumpCommand;
+
+use WP_CLI;
+use WP_CLI_Command;
+
 /**
  * The class that define the WP CLI "dump" Command
  */
-final class WP_CLI_Dump_Command extends \WP_CLI_Command {
+final class WPCLI_Dump extends WP_CLI_Command {
 	
 	/**
 	 * Download a dump of the database
