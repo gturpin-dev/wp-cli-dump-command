@@ -46,12 +46,16 @@ final class WP_CLI_Dump_Command extends \WP_CLI_Command {
 
 		// Execute the dump command from wp-cli
 		$_command = 'db export ' . escapeshellarg( $dump_file_path );
-		$_command = 'db tables --scope=blog --all-tables-with-prefix';
 		WP_CLI::runcommand( $_command, [
 			'return'     => true,
 			'launch'     => false,
 			'exit_error' => false,
 		] );
+
+		// The file must exist now, otherwise something went wrong
+		if ( ! file_exists( $dump_file_path ) ) {
+			WP_CLI::error( 'Something went wrong while dumping the database.' );
+		}
 
 		WP_CLI::success( sprintf( 'Database dumped successfully at "%s".', $dump_file_path ) );
 	}
