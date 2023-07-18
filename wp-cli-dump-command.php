@@ -44,11 +44,13 @@ add_action( 'admin_menu', function () {
 		'manage_options',
 		'wp-cli-dump-command',
 		function () {
+			echo '<div class="wrap">';
 			echo '<h1>' . esc_html( get_admin_page_title() ) . '</h1>';
 
 			$list_table = new Dumps_List_Table();
 			$list_table->prepare_items();
 			$list_table->display();
+			echo '</div>';
 		},
 		'dashicons-database-export',
 		85
