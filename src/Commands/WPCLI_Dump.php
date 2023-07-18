@@ -1,6 +1,6 @@
 <?php
 
-namespace WPCLI_DumpCommand;
+namespace WPCLI_DumpCommand\Commands;
 
 use WP_CLI;
 use WP_CLI_Command;
@@ -15,12 +15,12 @@ final class WPCLI_Dump extends WP_CLI_Command {
 	 * 
 	 * ## OPTIONS
 	 * 
-	 * [--file=<file>]
-	 * : The filename of the file to save the dump. If not provided, a default name will be used.
+	 * [--name=<name>]
+	 * : The name of the file to save the dump. If not provided, a default name will be used.
 	 * 
 	 * ## EXAMPLES
 	 * wp dump database
-	 * wp dump database --file=custom_dump.sql
+	 * wp dump database --name=custom_dump
 	 *
 	 * @param array $args The list of arguments
 	 * @param array $assoc_args The list of associative arguments
@@ -30,12 +30,12 @@ final class WPCLI_Dump extends WP_CLI_Command {
 	public function database( array $args, array $assoc_args ) {
 		// Assign default values
 		$assoc_args = wp_parse_args( $assoc_args, [
-			'file' => 'database.sql',
+			'name' => 'database',
 		] );
 
 		// Prepare file and path
-		$filename       = sanitize_file_name( $assoc_args['file'] );
-		$filename       = date( 'Ymdhis' ) . '-' . $filename;
+		$name           = sanitize_file_name( $assoc_args['name'] );
+		$filename       = $name . '_' . date( 'Ymd_his' ) . '.sql';
 		$dump_dir_path  = WP_CONTENT_DIR . '/dumps';
 		$dump_file_path = $dump_dir_path . '/' . $filename;
 

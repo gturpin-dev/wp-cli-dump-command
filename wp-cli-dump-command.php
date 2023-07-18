@@ -23,7 +23,8 @@
  * Domain Path:       /languages
  */
 
-use WPCLI_DumpCommand\WPCLI_Dump;
+use WPCLI_DumpCommand\Commands\WPCLI_Dump;
+use WPCLI_DumpCommand\Views\Dumps_List_Table;
 
 // Standard plugin security, keep this line in place.
 defined( 'ABSPATH' ) || die();
@@ -45,24 +46,9 @@ add_action( 'admin_menu', function () {
 		function () {
 			echo '<h1>' . esc_html( get_admin_page_title() ) . '</h1>';
 
-			// Getting all files in the dump directory
-			$dump_dir_path = WP_CONTENT_DIR . '/dumps';
-
-			if ( file_exists( $dump_dir_path ) ) {
-				$files = scandir( $dump_dir_path );
-				$files = array_diff( $files, [ '.', '..' ] );
-
-				if ( ! empty( $files ) ) {
-					echo '<ul>';
-
-					foreach ( $files as $file ) {
-						$file_url = WP_CONTENT_URL . '/dumps/' . $file;
-						echo '<li><a href="' . esc_url( $file_url ) . '">' . esc_html( $file ) . '</a></li>';
-					}
-
-					echo '</ul>';
-				}
-			}
+			$list_table = new Dumps_List_Table();
+			$list_table->prepare_items();
+			$list_table->display();
 		},
 		'dashicons-database-export',
 		85
