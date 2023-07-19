@@ -42,7 +42,7 @@ final class Plugin {
 
 	/**
 	 * The plugin's data
-	 * Note that some important informations are also store directly in the class properties.
+	 * Note that some important informations are also stored directly in the class properties.
 	 * @see https://developer.wordpress.org/reference/functions/get_plugin_data/ for more information.
 	 */
 	private array $plugin_data;
