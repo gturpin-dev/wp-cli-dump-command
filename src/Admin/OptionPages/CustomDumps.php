@@ -2,6 +2,7 @@
 
 namespace WPCLI_DumpCommand\Admin\OptionPages;
 
+use WPCLI_DumpCommand\PHPAttributes\Action;
 use WPCLI_DumpCommand\Views\Dumps_List_Table;
 
 /**
@@ -32,7 +33,7 @@ final class CustomDumps {
 	 *
 	 * @return void
 	 */
-	private function render(): void {
+	public function render(): void {
 		echo '<div class="wrap">';
 		echo '<h1>' . esc_html( get_admin_page_title() ) . '</h1>';
 
