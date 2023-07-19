@@ -2,9 +2,6 @@
 
 namespace WPCLI_DumpCommand;
 
-use WPCLI_DumpCommand\Internal\HookRegisterer;
-use WPCLI_DumpCommand\PHPAttributes\HookInterface;
-
 /**
  * This class is the entry point of the plugin.
  * It is responsible for loading the plugin's dependencies and store the plugin's information.
@@ -100,42 +97,11 @@ final class Plugin {
 		// Bind the plugin deactivation features
 		register_deactivation_hook( $this->main_file, [ PluginDeactivation::class, 'init' ] );
 
+		// Bind the plugin uninstall features
+		register_uninstall_hook( $this->main_file, [ PluginUninstall::class, 'init' ] );
+
 		// Bind the plugin features that need to be loaded each time
 		add_action( 'plugins_loaded', [ PluginLoaded::class, 'init' ] );
-
-		$hooked_class = require_once $this->get_path() . '/config/hooks.php';
-		$this->register_hooked_classes( $hooked_class );
-	}
-
-	/**
-	 * Bind all hooks defined in the hooked classes config.
-	 * 
-	 * @param array $hooked_classes List of classes to register
-	 *
-	 * @return void
-	 */
-	private static function register_hooked_classes( array $hooked_classes ): void {
-		$instances = [];
-
-		foreach ( $hooked_classes as $hooked_class ) {
-			if ( array_key_exists( $hooked_class, $instances ) ) continue;
-
-			$reflection_class = new \ReflectionClass( $hooked_class );
-
-			foreach ( $reflection_class->getMethods() as $method ) {
-				$attributes = $method->getAttributes( HookInterface::class, \ReflectionAttribute::IS_INSTANCEOF );
-
-				foreach ( $attributes as $attribute ) {
-					// instanciate the hooked class
-					$hooked_class_instance      = $instances[ $hooked_class ] ?? new $hooked_class();
-					$instances[ $hooked_class ] = $hooked_class_instance;
-
-					// instanciate the hook_attribute class
-					$hook_attribute_class = $attribute->newInstance();
-					$hook_attribute_class->register( [ $hooked_class_instance, $method->getName() ] );
-				}
-			}
-		}
 	}
 
 	// Prevent the instance from being cloned.
@@ -150,8 +116,6 @@ final class Plugin {
 	 * @return self The plugin's instance.
 	 */
 	public static function get_instance(): self {
-		var_dump( self::$_instance );
-		die();
 		if ( is_null( self::$_instance ) ) {
 			throw new \Exception( 'The plugin has not been initialized yet.' );
 		}
