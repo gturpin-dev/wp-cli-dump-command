@@ -26,7 +26,6 @@
  */
 
 use WPCLI_DumpCommand\Plugin;
-use WPCLI_DumpCommand\Commands\WPCLI_Dump;
 
 // Standard plugin security, keep this line in place.
 defined( 'ABSPATH' ) || die();
