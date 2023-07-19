@@ -2,10 +2,10 @@
 
 namespace WPCLI_DumpCommand\Commands;
 
+use WP_CLI;
 use WPCLI_DumpCommand\PHPAttributes\Action;
 use WPCLI_DumpCommand\Commands\WPCLI_Dump;
-
-use WP_CLI;
+use WPCLI_DumpCommand\Commands\WPCLI_DumpExport;
 
 /**
  * Register all wp-cli commands here
@@ -23,5 +23,6 @@ final class WPCLI_CommandRegisterer {
 		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) return;
 
 		WP_CLI::add_command( 'dump', WPCLI_Dump::class );
+		WP_CLI::add_command( 'dump:export', WPCLI_DumpExport::class );
 	}
 }
