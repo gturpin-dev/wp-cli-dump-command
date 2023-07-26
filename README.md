@@ -15,7 +15,7 @@ List of all commands with hierarchy:
     - [x] wp dump export database
     - [x] wp dump export themes
     - [x] wp dump export plugins
-    - [ ] wp dump export uploads
+    - [x] wp dump export uploads
     - [ ] wp dump export languages
 - [ ] wp dump import all ( import a generated zip by the "export all" command )
     - [ ] wp dump import database
