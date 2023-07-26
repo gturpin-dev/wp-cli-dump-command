@@ -137,26 +137,4 @@ final class WPCLI_DumpExport extends WP_CLI_Command {
 
 		WP_CLI::success( sprintf( 'Plugins dumped successfully at "%s".', $export_file->get_dir_path() ) );
 	}
-
-	/**
-	 * Get all files from a directory
-	 *
-	 * @param string $directory The directory to scan
-	 *
-	 * @return array The list of files
-	 */
-	private function get_files( string $directory ): array {
-		$files = [];
-
-		$directory_iterator = new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS );
-		$iterator     = new RecursiveIteratorIterator( $directory_iterator, RecursiveIteratorIterator::SELF_FIRST );
-
-		foreach ( $iterator as $file ) {
-			if ( $file->isFile() ) {
-				$files[] = $file->getPathname();
-			}
-		}
-
-		return $files;
-	}
 }
