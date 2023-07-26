@@ -47,13 +47,6 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 */
 	public function get_sortable_columns() {
 		return [];
-		// $sortable_columns = [
-		// 	'id'         => ['id', true],
-		// 	'file_name'  => ['file_name', false],
-		// 	'date_added' => ['date_added', false],
-		// ];
-
-		// return $sortable_columns;
 	}
 
 	/**
@@ -103,12 +96,18 @@ final class Dumps_List_Table extends \WP_List_Table {
 		// Map the files to an array of items.
 		$items = array_map( function( $filename ) {
 			$parsed_file = new FilenameDumpParser( $filename );
+
 			return [
 				'filename'   => $parsed_file->get_filename(),
 				'date_added' => $parsed_file->get_date(),
 				'url'        => $parsed_file->get_download_url(),
 			];
 		}, $files );
+
+		// Sort the items by most recent date
+		usort( $items, function( $a, $b ) {
+			return $b['date_added'] <=> $a['date_added'];
+		} );
 
 		return $items;
 	}
