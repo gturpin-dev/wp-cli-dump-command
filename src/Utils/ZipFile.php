@@ -35,6 +35,11 @@ final class ZipFile {
 		$zip   = new ZipArchive();
 		$files = self::get_files( $from );
 
+		// Bail if there are no files to zip
+		if ( empty( $files ) ) {
+			throw new ZipFailedException( sprintf( 'There are no files to zip in the directory "%s".', $from ) );
+		}
+
 		// Bail if the zip file couldn't be created
 		if ( $zip->open( $to . '/' . $filename, ZipArchive::CREATE ) !== true ) {
 			throw new ZipFailedException( sprintf( 'The zip file "%s" couldn\'t be created.', $filename ) );
