@@ -16,7 +16,7 @@ List of all commands with hierarchy:
     - [x] wp dump export themes
     - [x] wp dump export plugins
     - [x] wp dump export uploads
-    - [ ] wp dump export languages
+    - [x] wp dump export languages
 - [ ] wp dump import all ( import a generated zip by the "export all" command )
     - [ ] wp dump import database
     - [ ] wp dump import themes
@@ -27,6 +27,7 @@ List of all commands with hierarchy:
 ---
 Todos
 
+- [ ] Refacto the `dump export database` command
 - [ ] Find a way to implements all these commands with DRY as possible
 - [x] Maybe use WP_List_Table to list the dumps in option page
   - [x] Add a button to download the dump
