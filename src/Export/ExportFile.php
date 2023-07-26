@@ -54,7 +54,7 @@ final class ExportFile {
 
 		// The file must exist now, otherwise something went wrong
 		if ( ! file_exists( self::EXPORT_PATH . '/' . $this->filename ) ) {
-			throw new ExportFailedException( 'Something went wrong while dumping the plugins.' );
+			throw new ExportFailedException( sprintf( 'The export file "%s" has not been created.', self::EXPORT_PATH . '/' . $this->filename ) );
 		}
 
 		return true;
