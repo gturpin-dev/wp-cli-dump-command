@@ -93,45 +93,15 @@ final class WPCLI_DumpExport extends WP_CLI_Command {
 			'name' => 'themes',
 		] );
 
-		// Prepare file and path
-		$name           = sanitize_file_name( $assoc_args['name'] );
-		$filename       = $name . '_' . date( 'Ymd_his' ) . '.zip';
-		$dump_dir_path  = WP_CONTENT_DIR . '/dumps';
-		$dump_file_path = $dump_dir_path . '/' . $filename;
-
-		// Create the dump directory if it doesn't exist
-		if ( ! file_exists( $dump_dir_path ) ) {
-			mkdir( $dump_dir_path );
+		// Create export file
+		try {
+			$export_file = new ExportFile( $assoc_args['name'] );
+			$export_file->create_from( WP_CONTENT_DIR . '/themes' );
+		} catch ( ExportFailedException $e ) {
+			WP_CLI::error( $e->getMessage() );
 		}
 
-		// Bail if the file already exists
-		if ( file_exists( $dump_file_path ) ) {
-			WP_CLI::error( sprintf( 'File "%s" already exists. Please choose a different name.', $filename ) );
-		}
-
-		// Create the zip file
-		$zip   = new ZipArchive();
-		$files = $this->get_files( WP_CONTENT_DIR . '/themes' );
-
-		// Bail if the zip file couldn't be created
-		if ( $zip->open( $dump_file_path, ZipArchive::CREATE ) !== true ) {
-			WP_CLI::error( 'Something went wrong while creating the zip file.' );
-		}
-
-		// Add all files to the zip file
-		foreach ( $files as $file ) {
-			$zip->addFile( $file, str_replace( WP_CONTENT_DIR . '/themes/', '', $file ) );
-		}
-
-		// Close the zip file
-		$zip->close();
-
-		// The file must exist now, otherwise something went wrong
-		if ( ! file_exists( $dump_file_path ) ) {
-			WP_CLI::error( 'Something went wrong while dumping the themes.' );
-		}
-
-		WP_CLI::success( sprintf( 'Themes dumped successfully at "%s".', $dump_file_path ) );
+		WP_CLI::success( sprintf( 'Themes dumped successfully at "%s".', $export_file->get_dir_path() ) );
 	}
 
 	/**
