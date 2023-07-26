@@ -13,7 +13,7 @@ List of all commands with hierarchy:
 
 - [ ] wp dump export all ( generate a zip with all dumps below )
     - [x] wp dump export database
-    - [ ] wp dump export themes
+    - [x] wp dump export themes
     - [ ] wp dump export plugins
     - [ ] wp dump export uploads
     - [ ] wp dump export languages
