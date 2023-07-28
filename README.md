@@ -27,12 +27,11 @@ List of all commands with hierarchy:
 ---
 Todos
 
-- [ ] Refacto the `dump export database` command
-- [ ] Find a way to implements all these commands with DRY as possible
+- [x] Find a way to implements all these commands with DRY as possible
 - [x] Maybe use WP_List_Table to list the dumps in option page
   - [x] Add a button to download the dump
   - [ ] Add a button to delete the dump
-  - [ ] The list should be paginated
+  - [x] The list should be paginated
   - [ ] The list must have filters by their type (database, plugins, themes, uploads, languages)
   - [ ] The list must have a search input
   - [ ] The list must handle bulk actions (delete, download)
