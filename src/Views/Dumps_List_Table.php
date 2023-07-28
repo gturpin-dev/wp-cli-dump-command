@@ -108,25 +108,22 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 * Sorting function for usort().
 	 */
     private function usort_reorder( $a, $b ) {
-        // If no sort, default to user_login
-        $orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'date_added';
+		// If no sort, default to date_added
+		$orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'date_added';
 
-        // If no order, default to asc
-        $order = ( ! empty( $_GET['order'] ) ) ? $_GET['order'] : 'asc';
-
+		// If no order, default to asc
+		$order = ( ! empty( $_GET['order'] ) ) ? $_GET['order'] : 'desc';
 
 		// If the orderby is 'date_added', convert the date to a timestamp.
 		if ( $orderby === 'date_added' ) {
-			$a = $a['date_added'] ?? '';
-			$b = $b['date_added'] ?? '';
-			$a = $a->getTimestamp();
-			$b = $b->getTimestamp();
+			$a_date_added = isset( $a['date_added'] ) ? $a['date_added']->getTimestamp() : 0;
+			$b_date_added = isset( $b['date_added'] ) ? $b['date_added']->getTimestamp() : 0;
 
-			return ( $order === 'asc' ) ? $a - $b : $b - $a;
+			return ( $order === 'asc' ) ? $a_date_added - $b_date_added : $b_date_added - $a_date_added;
 		}
 
 		// Basic comparison
-        $result = strcmp( $a[$orderby], $b[$orderby] );
+        $result = strcmp( $a[ $orderby ], $b[ $orderby ] );
 
         // Send final sort direction to usort
         return ( $order === 'asc' ) ? $result : -$result;
