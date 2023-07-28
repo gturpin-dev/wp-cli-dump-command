@@ -144,8 +144,11 @@ final class Dumps_List_Table extends \WP_List_Table {
 		// Process any individual custom actions.
 		$this->process_custom_actions();
 
+		// Check for search query.
+		$search = isset( $_POST['s'] ) ? sanitize_text_field( $_POST['s'] ) : '';
+
 		// Retrieve data
-		$items          = $this->get_items();
+		$items          = $this->get_items( $search );
 		$posts_per_page = self::ITEMS_PER_PAGE;
 		$current_page   = $this->get_pagenum();
 		$total_items    = count( $items );
@@ -163,10 +166,12 @@ final class Dumps_List_Table extends \WP_List_Table {
 
 	/**
 	 * Retrieve the items
+	 * 
+	 * @param string $search Search query.
 	 *
 	 * @return array $items Data for display in the table.
 	 */
-	private function get_items(): array {
+	private function get_items( string $search = '' ): array {
 		$dump_dir_path = ExportFile::EXPORT_PATH;
 
 		// Bail if the dump directory does not exist.
@@ -174,6 +179,13 @@ final class Dumps_List_Table extends \WP_List_Table {
 
 		$files = scandir( $dump_dir_path, SCANDIR_SORT_DESCENDING );
 		$files = array_diff( $files, [ '.', '..' ] );
+
+		// Filter the files by the search query.
+		if ( ! empty( $search ) ) {
+			$files = array_filter( $files, function( $filename ) use ( $search ) {
+				return str_contains( $filename, $search );
+			} );
+		}
 
 		// Map the files to an array of items.
 		$items = array_map( function( $filename ) {
