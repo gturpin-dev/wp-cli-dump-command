@@ -10,6 +10,8 @@ use WPCLI_DumpCommand\Views\Dumps_List_Table;
  */
 final class CustomDumps {
 	
+	public const PAGE_SLUG = 'wp-cli-dump-command';
+	
 	/**
 	 * Register the option page
 	 *
@@ -21,7 +23,7 @@ final class CustomDumps {
 			__( 'Custom Dumps', 'wp-cli-dump-command' ),
 			__( 'Custom Dumps', 'wp-cli-dump-command' ),
 			'manage_options',
-			'wp-cli-dump-command',
+			self::PAGE_SLUG,
 			[ $this, 'render' ],
 			'dashicons-database-export',
 			85
@@ -42,5 +44,23 @@ final class CustomDumps {
 		$list_table->display();
 
 		echo '</div>';
+	}
+
+	/**
+	 * Adding styles to the option page in the admin area
+	 *
+	 * @return void
+	 */
+	#[Action( 'admin_head' )]
+	public function admin_styles() {
+		?>
+		<style>
+			.wp-core-ui .button-error {
+				background-color: #dc3232 !important;
+				border-color: #dc3232 !important;
+				color: #fff !important;
+			}
+		</style>
+		<?php
 	}
 }

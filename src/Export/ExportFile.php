@@ -88,6 +88,17 @@ final class ExportFile {
 	}
 
 	/**
+	 * Delete the export file based on the filename
+	 * 
+	 * @param string $filename The name of the file to delete
+	 *
+	 * @return void
+	 */
+	public static function delete( string $filename ) {
+		unlink( self::EXPORT_PATH . '/' . $filename );
+	}
+
+	/**
 	 * Get the directory path of the export file
 	 *
 	 * @return string
