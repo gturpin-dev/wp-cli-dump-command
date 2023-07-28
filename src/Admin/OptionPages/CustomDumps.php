@@ -37,12 +37,14 @@ final class CustomDumps {
 	 */
 	public function render(): void {
 		echo '<div class="wrap">';
+		echo '<form method="POST">';
 		echo '<h1>' . esc_html( get_admin_page_title() ) . '</h1>';
 
 		$list_table = new Dumps_List_Table();
 		$list_table->prepare_items();
 		$list_table->display();
 
+		echo '</form>';
 		echo '</div>';
 	}
 
