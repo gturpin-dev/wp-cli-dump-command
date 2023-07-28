@@ -13,6 +13,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  * This custom list table displays the dumps in the admin area.
  */
 final class Dumps_List_Table extends \WP_List_Table {
+
+	private const ITEMS_PER_PAGE = 15;
 	
 	/**
 	 * Initialize the list table.
@@ -64,7 +66,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 		$items          = $this->get_items();
 		$total_items    = count( $items );
 		$current_page   = $this->get_pagenum();
-		$posts_per_page = 10;
+		$posts_per_page = self::ITEMS_PER_PAGE;
 		$offset         = ( $current_page - 1 ) * $posts_per_page;          // Calculate the offset for pagination.
 		$items          = array_slice( $items, $offset, $posts_per_page );  // Set the items for display.
 
