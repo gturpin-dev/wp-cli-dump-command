@@ -2,6 +2,7 @@
 
 namespace WPCLI_DumpCommand\Views;
 
+use WPCLI_DumpCommand\Export\ExportFile;
 use WPCLI_DumpCommand\Utils\FilenameDumpParser;
 
 // require WP_List_Table
@@ -86,8 +87,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 * @return array $items Data for display in the table.
 	 */
 	private function get_items(): array {
-		// @TODO getting this path from other source
-		$dump_dir_path = WP_CONTENT_DIR . '/dumps';
+		$dump_dir_path = ExportFile::EXPORT_PATH;
 
 		// Bail if the dump directory does not exist.
 		if ( ! is_dir( $dump_dir_path ) ) return [];
