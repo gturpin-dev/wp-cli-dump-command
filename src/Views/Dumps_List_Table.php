@@ -30,15 +30,6 @@ final class Dumps_List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Display the table.
-	 *
-	 * @return void
-	 */
-	public function display() {
-		parent::display();
-	}
-
-	/**
 	 * Check for custom actions and process them.
 	 *
 	 * @return void
@@ -136,13 +127,20 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 * @return array
 	 */
 	public function prepare_items() {
+		// DUmp the current screen
+		
 		// Set up column headers, sortable columns, hidden columns etc.
 		$this->_column_headers = [ $this->get_columns(), [], $this->get_sortable_columns() ];
 
 		// @TODO Process any bulk actions if triggered.
+		// if ( isset( $_GET['action'] ) && $_GET['action'] == 'delete' ) {
+		// 	var_dump( 'actions' );
+		// 	echo '<pre>' . print_r( $_GET, true ) . '</pre>';
+		// 	die();
+		// }
 
 		// Process any individual custom actions.
-		$this->process_custom_actions();
+		// $this->process_custom_actions();
 
 		// Check for search query.
 		$search = isset( $_POST['s'] ) ? sanitize_text_field( $_POST['s'] ) : '';
@@ -203,6 +201,20 @@ final class Dumps_List_Table extends \WP_List_Table {
 		return $items;
 	}
 
+	/**
+	 * Function to show the bulk actions.
+	 *
+	 * @return void
+	 */
+    function get_bulk_actions() {
+		$actions = [
+			'download' => __( 'Download', 'wp-cli-dump-command' ),
+			'delete'   => __( 'Delete', 'wp-cli-dump-command' ),
+		];
+
+		return $actions;
+    }
+
 	/** Text displayed when no item data is available */
 	public function no_items() {
 		_e( 'No items avaliable.', 'wp-cli-dump-command' );
@@ -227,7 +239,34 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 * @return string
 	 */
 	public function column_filename( $item ) {
-		return $item['filename'] ?? '';
+
+		// Creates nonces for the actions.
+		$delete_nonce   = wp_create_nonce( 'delete_dump' );
+		$download_nonce = wp_create_nonce( 'download_dump' );
+
+		$base_url = admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG );
+		$actions  = [
+			'download' => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				add_query_arg( [ 
+					'action'   => 'download',
+					'filename' => $item['filename'] ?? '',
+					'nonce'    => $download_nonce,
+				], $base_url ),
+				__( 'Download', 'wp-cli-dump-command' )
+			),
+			'delete'   => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				add_query_arg( [ 
+					'action'   => 'delete',
+					'filename' => $item['filename'] ?? '',
+					'nonce'    => $delete_nonce,
+				], $base_url ),
+				__( 'Delete', 'wp-cli-dump-command' )
+			),
+		];
+		
+		return sprintf( '%1$s %2$s', $item['filename'], $this->row_actions( $actions ) );
 	}
 
 	/**
@@ -258,26 +297,25 @@ final class Dumps_List_Table extends \WP_List_Table {
 		$delete_nonce   = wp_create_nonce( 'delete_dump' );
 		$download_nonce = wp_create_nonce( 'download_dump' );
 
-		$actions = [
-			'delete'   => sprintf(
-				'<a href="%1$s" class="button button-error">%2$s</a>',
-				add_query_arg( [ 
-					'action'   => 'delete',
-					'filename' => $item['filename'] ?? '',
-					'nonce'    => $delete_nonce,
-				],
-				admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG ) ),
-				__( 'Delete', 'wp-cli-dump-command' )
-			),
+		$base_url = admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG );
+		$actions  = [
 			'download' => sprintf(
 				'<a href="%1$s" class="button button-primary">%2$s</a>',
 				add_query_arg( [ 
 					'action'   => 'download',
 					'filename' => $item['filename'] ?? '',
 					'nonce'    => $download_nonce,
-				],
-				admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG ) ),
+				], $base_url ),
 				__( 'Download', 'wp-cli-dump-command' )
+			),
+			'delete'   => sprintf(
+				'<a href="%1$s" class="button button-error">%2$s</a>',
+				add_query_arg( [ 
+					'action'   => 'delete',
+					'filename' => $item['filename'] ?? '',
+					'nonce'    => $delete_nonce,
+				], $base_url ),
+				__( 'Delete', 'wp-cli-dump-command' )
 			),
 		];
 
