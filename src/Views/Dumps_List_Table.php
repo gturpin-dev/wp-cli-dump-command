@@ -136,7 +136,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 * @return array
 	 */
 	public function prepare_items() {
-		// Set up column headers, sortable columns, and bulk actions.
+		// Set up column headers, sortable columns, hidden columns etc.
 		$this->_column_headers = [ $this->get_columns(), [], $this->get_sortable_columns() ];
 
 		// @TODO Process any bulk actions if triggered.
@@ -144,20 +144,20 @@ final class Dumps_List_Table extends \WP_List_Table {
 		// Process any individual custom actions.
 		$this->process_custom_actions();
 
+		// Retrieve data
 		$items          = $this->get_items();
-		$total_items    = count( $items );
-		$current_page   = $this->get_pagenum();
 		$posts_per_page = self::ITEMS_PER_PAGE;
+		$current_page   = $this->get_pagenum();
+		$total_items    = count( $items );
 		$offset         = ( $current_page - 1 ) * $posts_per_page;          // Calculate the offset for pagination.
 		$items          = array_slice( $items, $offset, $posts_per_page );  // Set the items for display.
-
-		// Set the items for display.
-		$this->items = $items;
+		$this->items    = $items;
 
 		// Set the pagination arguments.
 		$this->set_pagination_args( [
 			'total_items' => $total_items,
 			'per_page'    => $posts_per_page,
+			'total_pages' => ceil( $total_items / $posts_per_page ),
 		] );
 	}
 
