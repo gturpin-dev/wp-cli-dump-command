@@ -16,7 +16,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  */
 final class Dumps_List_Table extends \WP_List_Table {
 
-	private const ITEMS_PER_PAGE = 15;
+	private const ITEMS_PER_PAGE = 10;
 	
 	/**
 	 * Initialize the list table.
@@ -30,36 +30,41 @@ final class Dumps_List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Check for custom actions and process them.
+	 * Process the custom actions if they are correctly triggered.
+	 * 
+	 * @param string $action  The action to process.
+	 * @param array  $elements  The elements to process.
+	 * @param string $nonce  The nonce to verify.
 	 *
 	 * @return void
 	 */
-	private function process_custom_actions() {
-		$this->maybe_process_delete_action();
-		$this->maybe_process_download_action();
+	public static function process_custom_actions( string $action, array $elements, ?string $nonce ): void {
+		// Bail if no action
+		if ( is_null( $action ) || $action == -1 ) return;
+
+		match ( $action ) {
+			'delete'   => self::process_delete_action( $elements, $nonce ),
+			'download' => self::process_download_action( $elements, $nonce ),
+			default    => null,
+		};
 	}
 
 	/**
 	 * Check if the download action was triggered and process it.
+	 * 
+	 * @param array  $elements The elements to process.
+	 * @param string $nonce    The nonce to verify.
 	 *
 	 * @return void
 	 */
-	private function maybe_process_delete_action() {
-		// Bail if the action is not triggered.
-		if ( ! isset( $_GET['action'] ) ) return;
-		if ( $_GET['action'] !== 'delete' ) return;
+	private static function process_delete_action( array $elements, ?string $nonce ): void {
+		// Bail only if the nonce is needed ( not null ) and it's not verified
+		if ( ! is_null( $nonce ) && ! wp_verify_nonce( $nonce, 'delete_dump' ) ) return;
 
-		// Bail if the nonce is not valid.
-		if ( ! isset( $_GET['nonce'] ) ) return;
-		if ( ! wp_verify_nonce( $_GET['nonce'], 'delete_dump' ) ) return;
-
-		// Bail if the dump ID is not valid.
-		if ( ! isset( $_GET['filename'] ) ) return;
-
-		$filename = sanitize_text_field( $_GET['filename'] );
-		
-		// Delete the dump.
-		ExportFile::delete( $filename );
+		array_walk( $elements, function ( $filename ) {
+			$filename = sanitize_text_field( $filename );
+			ExportFile::delete( $filename );
+		} );
 
 		// Redirect to the option page.
 		wp_safe_redirect( admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG ) );
@@ -217,7 +222,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 
 	/** Text displayed when no item data is available */
 	public function no_items() {
-		_e( 'No items avaliable.', 'wp-cli-dump-command' );
+		_e( 'No dumps available.', 'wp-cli-dump-command' );
 	}
 
 	/**
@@ -250,7 +255,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 				'<a href="%1$s">%2$s</a>',
 				add_query_arg( [ 
 					'action'   => 'download',
-					'filename' => $item['filename'] ?? '',
+					'element' => $item['filename'] ?? '',
 					'nonce'    => $download_nonce,
 				], $base_url ),
 				__( 'Download', 'wp-cli-dump-command' )
@@ -259,7 +264,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 				'<a href="%1$s">%2$s</a>',
 				add_query_arg( [ 
 					'action'   => 'delete',
-					'filename' => $item['filename'] ?? '',
+					'element' => $item['filename'] ?? '',
 					'nonce'    => $delete_nonce,
 				], $base_url ),
 				__( 'Delete', 'wp-cli-dump-command' )
@@ -303,7 +308,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 				'<a href="%1$s" class="button button-primary">%2$s</a>',
 				add_query_arg( [ 
 					'action'   => 'download',
-					'filename' => $item['filename'] ?? '',
+					'element' => $item['filename'] ?? '',
 					'nonce'    => $download_nonce,
 				], $base_url ),
 				__( 'Download', 'wp-cli-dump-command' )
@@ -312,7 +317,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 				'<a href="%1$s" class="button button-error">%2$s</a>',
 				add_query_arg( [ 
 					'action'   => 'delete',
-					'filename' => $item['filename'] ?? '',
+					'element' => $item['filename'] ?? '',
 					'nonce'    => $delete_nonce,
 				], $base_url ),
 				__( 'Delete', 'wp-cli-dump-command' )

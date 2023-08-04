@@ -11,6 +11,22 @@ use WPCLI_DumpCommand\Views\Dumps_List_Table;
 final class CustomDumps {
 	
 	public const PAGE_SLUG = 'wp-cli-dump-command';
+
+	/**
+	 * Handle the actions in the option page
+	 * They can be bulk actions or single actions
+	 * Then can be GET or POST
+	 *
+	 * @return void
+	 */
+	#[Action( 'admin_init' )]
+	public function handle_actions(): void {
+		$action   = $_REQUEST['action'] ?? $_REQUEST['action2'] ?? '';
+		$elements = isset( $_REQUEST['element'] ) ? (array) $_REQUEST['element'] : [];
+		$nonce    = $_REQUEST['nonce'] ?? null; // Null means no nonce needed
+
+		Dumps_List_Table::process_custom_actions( $action, $elements, $nonce );
+	}
 	
 	/**
 	 * Register the option page
