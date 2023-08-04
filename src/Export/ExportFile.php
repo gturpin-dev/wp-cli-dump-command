@@ -6,6 +6,7 @@ use WPCLI_DumpCommand\Utils\ZipFile;
 use WPCLI_DumpCommand\Utils\FilenameDumpParser;
 use WPCLI_DumpCommand\Exceptions\ZipFailedException;
 use WPCLI_DumpCommand\Exceptions\ExportFailedException;
+use WPCLI_DumpCommand\Exceptions\FileNotFoundException;
 use WPCLI_DumpCommand\Exceptions\BadDumpFilenameException;
 
 final class ExportFile {
@@ -96,6 +97,25 @@ final class ExportFile {
 	 */
 	public static function delete( string $filename ) {
 		unlink( self::EXPORT_PATH . '/' . $filename );
+	}
+
+	public static function download( string $filename ) {
+		$file = self::EXPORT_PATH . '/' . $filename;
+
+		if ( ! file_exists( $file ) ) {
+			throw new FileNotFoundException( sprintf( 'The export file "%s" does not exist.', $file ) );
+		}
+
+		header( 'Content-Description: File Transfer' );
+		header( 'Content-Type: application/octet-stream' );
+		header( 'Content-Disposition: attachment; filename="' . basename( $file ) . '"' );
+		header( 'Expires: 0' );
+		header( 'Cache-Control: must-revalidate' );
+		header( 'Pragma: public' );
+		header( 'Content-Length: ' . filesize( $file ) );
+
+		readfile( $file );
+		exit;
 	}
 
 	/**

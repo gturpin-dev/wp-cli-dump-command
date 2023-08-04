@@ -50,7 +50,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 	}
 
 	/**
-	 * Check if the download action was triggered and process it.
+	 * Process the delete action
 	 * 
 	 * @param array  $elements The elements to process.
 	 * @param string $nonce    The nonce to verify.
@@ -64,6 +64,27 @@ final class Dumps_List_Table extends \WP_List_Table {
 		array_walk( $elements, function ( $filename ) {
 			$filename = sanitize_text_field( $filename );
 			ExportFile::delete( $filename );
+		} );
+
+		// Redirect to the option page.
+		wp_safe_redirect( admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG ) );
+	}
+
+	/**
+	 * Process the download action
+	 * 
+	 * @param array  $elements The elements to process.
+	 * @param string $nonce    The nonce to verify.
+	 *
+	 * @return void
+	 */
+	private static function process_download_action( array $elements, ?string $nonce ): void {
+		// Bail only if the nonce is needed ( not null ) and it's not verified
+		if ( ! is_null( $nonce ) && ! wp_verify_nonce( $nonce, 'download_dump' ) ) return;
+
+		array_walk( $elements, function ( $filename ) {
+			$filename = sanitize_text_field( $filename );
+			ExportFile::download( $filename );
 		} );
 
 		// Redirect to the option page.
@@ -103,7 +124,17 @@ final class Dumps_List_Table extends \WP_List_Table {
 	/**
 	 * Sorting function for usort().
 	 */
-    private function usort_reorder( $a, $b ) {
+
+	/**
+	 * Sorting function for usort().
+	 * Manage the sorting of the table weither for order or orderby and DateTime.
+	 *
+	 * @param mixed $a The first element to compare.
+	 * @param mixed $b The second element to compare.
+	 *
+	 * @return int The result of the comparison.
+	 */
+    private function usort_reorder( $a, $b ): int {
 		// If no sort, default to date_added
 		$orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'date_added';
 
@@ -132,20 +163,8 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 * @return array
 	 */
 	public function prepare_items() {
-		// DUmp the current screen
-		
 		// Set up column headers, sortable columns, hidden columns etc.
 		$this->_column_headers = [ $this->get_columns(), [], $this->get_sortable_columns() ];
-
-		// @TODO Process any bulk actions if triggered.
-		// if ( isset( $_GET['action'] ) && $_GET['action'] == 'delete' ) {
-		// 	var_dump( 'actions' );
-		// 	echo '<pre>' . print_r( $_GET, true ) . '</pre>';
-		// 	die();
-		// }
-
-		// Process any individual custom actions.
-		// $this->process_custom_actions();
 
 		// Check for search query.
 		$search = isset( $_POST['s'] ) ? sanitize_text_field( $_POST['s'] ) : '';
@@ -211,7 +230,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 *
 	 * @return void
 	 */
-    function get_bulk_actions() {
+    public function get_bulk_actions() {
 		$actions = [
 			'download' => __( 'Download', 'wp-cli-dump-command' ),
 			'delete'   => __( 'Delete', 'wp-cli-dump-command' ),
