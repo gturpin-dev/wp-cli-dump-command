@@ -30,15 +30,14 @@ Todos
 - [x] Find a way to implements all these commands with DRY as possible
 - [x] Maybe use WP_List_Table to list the dumps in option page
   - [x] Add a button to download the dump
-  - [ ] Add a button to delete the dump
+  - [x] Add a button to delete the dump
   - [x] The list should be paginated
   - [ ] The list must have filters by their type (database, plugins, themes, uploads, languages)
-  - [ ] The list must have a search input
-  - [ ] The list must handle bulk actions (delete, download)
+  - [x] The list must have a search input
+  - [x] The list must handle bulk actions (delete, download)
   - [x] Each dump must have a column with the date of creation
 - [ ] Make sure the dumps are deleted in X days
   - [ ] Add a setting to change the number of days in a hook or in the option page
-- [ ] Check if it's possible to replace the table prefix in the database dump
 - [ ] Add an option to perform a search-replace in the database dump ( create a backup, perform the search-replace, create the dump, reimport the backup and then delete the backup )
 
 ---

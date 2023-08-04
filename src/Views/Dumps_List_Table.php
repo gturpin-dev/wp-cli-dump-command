@@ -43,8 +43,8 @@ final class Dumps_List_Table extends \WP_List_Table {
 		if ( is_null( $action ) || $action == -1 ) return;
 
 		match ( $action ) {
-			'delete'   => self::process_delete_action( $elements, $nonce ),
 			'download' => self::process_download_action( $elements, $nonce ),
+			'delete'   => self::process_delete_action( $elements, $nonce ),
 			default    => null,
 		};
 	}
@@ -232,7 +232,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 */
     public function get_bulk_actions() {
 		$actions = [
-			'download' => __( 'Download', 'wp-cli-dump-command' ),
+			'download' => __( 'Download', 'wp-cli-dump-command' ), // @TODO Maybe to remove
 			'delete'   => __( 'Delete', 'wp-cli-dump-command' ),
 		];
 
