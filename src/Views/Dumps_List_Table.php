@@ -245,6 +245,15 @@ final class Dumps_List_Table extends \WP_List_Table {
 		$files = scandir( $dump_dir_path, SCANDIR_SORT_DESCENDING );
 		$files = array_diff( $files, [ '.', '..' ] );
 
+		// Filter by the views if set.
+		$filter_by_view = $_REQUEST['dump_type'] ?? 'all';
+		if ( ! empty( $filter_by_view ) && $filter_by_view !== 'all' ) {
+			$files = array_filter( $files, function( $filename ) use ( $filter_by_view ) {
+				$parsed_file = new FilenameDumpParser( $filename );
+				return $parsed_file->get_name() === $filter_by_view;
+			} );
+		}
+		
 		// Filter the files by the search query.
 		if ( ! empty( $search ) ) {
 			$files = array_filter( $files, function( $filename ) use ( $search ) {
@@ -257,7 +266,6 @@ final class Dumps_List_Table extends \WP_List_Table {
 		if ( ! empty( $filter_by_month ) && $filter_by_month !== 'all' ) {
 			$files = array_filter( $files, function( $filename ) use ( $filter_by_month ) {
 				$parsed_file = new FilenameDumpParser( $filename );
-				
 				return $parsed_file->get_date()->format( 'mY' ) === $filter_by_month;
 			} );
 		}
