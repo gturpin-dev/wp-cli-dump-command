@@ -292,6 +292,32 @@ final class Dumps_List_Table extends \WP_List_Table {
 		return $actions;
     }
 
+	/**
+	 * WP call "views" the filters on the top of the table above the bulk actions.
+	 *
+	 * @return array The views for the table
+	 */
+	protected function get_views() {
+		$links = [
+			'all',
+			'plugins',
+			'themes',
+			'uploads',
+			'database'
+		];
+		$base_url = admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG );
+		$links    = array_combine( $links, $links );
+		$links    = array_map( function( $link ) use ( $base_url ) {
+			$url   = add_query_arg( 'dump_type', $link, $base_url );
+			$class = ( isset( $_GET['dump_type'] ) && $_GET['dump_type'] === $link ) ? 'current' : '';
+			$label = ucfirst( $link );
+
+			return sprintf( '<a href="%s" class="%s">%s</a>', esc_url( $url ), $class, $label );
+		}, $links );
+		
+		return $links;
+	}
+
 	/** Text displayed when no item data is available */
 	public function no_items() {
 		_e( 'No dumps available.', 'wp-cli-dump-command' );
