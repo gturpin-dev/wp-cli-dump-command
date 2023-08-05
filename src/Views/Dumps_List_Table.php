@@ -300,20 +300,41 @@ final class Dumps_List_Table extends \WP_List_Table {
 	protected function get_views() {
 		$links = [
 			'all',
-			'plugins',
 			'themes',
+			'plugins',
 			'uploads',
 			'database'
 		];
-		$base_url = admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG );
-		$links    = array_combine( $links, $links );
-		$links    = array_map( function( $link ) use ( $base_url ) {
-			$url   = add_query_arg( 'dump_type', $link, $base_url );
-			$class = ( isset( $_GET['dump_type'] ) && $_GET['dump_type'] === $link ) ? 'current' : '';
-			$label = ucfirst( $link );
 
-			return sprintf( '<a href="%s" class="%s">%s</a>', esc_url( $url ), $class, $label );
+		// Get count of all files.
+		$files = $this->items;
+		$files = array_map( function( $file ) {
+			return new FilenameDumpParser( $file['filename'] ?? '' );
+		}, $files );
+
+		// Get the count of files for each link.
+		$links = array_combine( $links, $links );
+		$links = array_map( function( $link ) use ( $files ) {
+			if ( $link === 'all' ) return count( $files );
+
+			$files = array_filter( $files, function( $file ) use ( $link ) {
+				return $file->get_name() === $link;
+			} );
+
+			return count( $files );
 		}, $links );
+
+		// Build the links.
+		$base_url = admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG );
+		$links    = array_map( function( $count, $link ) use ( $base_url ) {
+			$url   = add_query_arg( 'dump_type', $link, $base_url );
+			$class = ( ! isset( $_REQUEST['dump_type'] ) && $link === 'all' ) ? 'current' : '';
+			$class = ( isset( $_REQUEST['dump_type'] ) && $_REQUEST['dump_type'] === $link ) ? 'current' : '';
+			$label = ucfirst( $link );
+			$count = sprintf( '<span class="count">(%d)</span>', $count );
+
+			return sprintf( '<a href="%s" class="%s">%s %s</a>', esc_url( $url ), $class, $label, $count );
+		}, $links, array_keys( $links ) );
 		
 		return $links;
 	}

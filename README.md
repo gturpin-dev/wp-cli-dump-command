@@ -11,7 +11,8 @@ This repo adds a `dump` command to WP-CLI. It allows you to dump multiple things
 
 List of all commands with hierarchy:
 
-- [ ] wp dump export all ( generate a zip with all dumps below )
+- [ ] wp dump export all ( generate a zip with all dumps below ( named "full_xxx" ? ) )
+  - [ ] On each export, remove the possibility to customize the name of the file as it is used to manage the List Table
     - [x] wp dump export database
     - [x] wp dump export themes
     - [x] wp dump export plugins
