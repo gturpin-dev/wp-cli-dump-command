@@ -107,15 +107,10 @@ final class Dumps_List_Table extends \WP_List_Table {
 		// Fill the select with the months and years
 		$filter_by_month = $_REQUEST['filter_by_month'] ?? 'all';
 		$months          = [];
+		$files           = $this->get_all_items();
 
-		// Bail if the dump directory does not exist.
-		if ( ! is_dir( ExportFile::EXPORT_PATH ) ) return;
-
-		$files = scandir( ExportFile::EXPORT_PATH, SCANDIR_SORT_DESCENDING );
-		$files = array_diff( $files, [ '.', '..' ] );
-		$dates = array_map( fn ( $filename ) => ( new FilenameDumpParser( $filename ) )->get_date(), $files );
-
-		array_walk( $dates, function ( $datetime ) use ( &$months ) {
+		array_walk( $files, function ( $file ) use ( &$months ) {
+			$datetime = $file->get_date();
 			$month    = $datetime->format( 'mY' );
 			$label    = $datetime->format( 'F Y' );
 
@@ -230,6 +225,22 @@ final class Dumps_List_Table extends \WP_List_Table {
 	}
 
 	/**
+	 * Retrieve all items from the dump directory, no filtering.
+	 *
+	 * @return array
+	 */
+	private function get_all_items(): array {
+		// Bail if the dump directory does not exist.
+		if ( ! is_dir( ExportFile::EXPORT_PATH ) ) return [];
+		
+		$files = scandir( ExportFile::EXPORT_PATH, SCANDIR_SORT_DESCENDING );
+		$files = array_diff( $files, [ '.', '..' ] );
+		$files = array_map( fn( $filename ) => new FilenameDumpParser( $filename ), $files );
+
+		return $files;
+	}
+
+	/**
 	 * Retrieve the items
 	 * 
 	 * @param string $search Search query.
@@ -237,47 +248,37 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 * @return array $items Data for display in the table.
 	 */
 	private function get_items( string $search = '' ): array {
-		$dump_dir_path = ExportFile::EXPORT_PATH;
-
-		// Bail if the dump directory does not exist.
-		if ( ! is_dir( $dump_dir_path ) ) return [];
-
-		$files = scandir( $dump_dir_path, SCANDIR_SORT_DESCENDING );
-		$files = array_diff( $files, [ '.', '..' ] );
+		$files = $this->get_all_items();
 
 		// Filter by the views if set.
 		$filter_by_view = $_REQUEST['dump_type'] ?? 'all';
 		if ( ! empty( $filter_by_view ) && $filter_by_view !== 'all' ) {
-			$files = array_filter( $files, function( $filename ) use ( $filter_by_view ) {
-				$parsed_file = new FilenameDumpParser( $filename );
-				return $parsed_file->get_name() === $filter_by_view;
+			$files = array_filter( $files, function( $file ) use ( $filter_by_view ) {
+				return $file->get_name() === $filter_by_view;
 			} );
 		}
 		
 		// Filter the files by the search query.
 		if ( ! empty( $search ) ) {
-			$files = array_filter( $files, function( $filename ) use ( $search ) {
-				return str_contains( $filename, $search );
+			$files = array_filter( $files, function( $file ) use ( $search ) {
+				return str_contains( $file->get_filename(), $search );
 			} );
 		}
 
 		// Filter the files by the month filter if set.
 		$filter_by_month = $_REQUEST['filter_by_month'] ?? 'all';
 		if ( ! empty( $filter_by_month ) && $filter_by_month !== 'all' ) {
-			$files = array_filter( $files, function( $filename ) use ( $filter_by_month ) {
-				$parsed_file = new FilenameDumpParser( $filename );
-				return $parsed_file->get_date()->format( 'mY' ) === $filter_by_month;
+			$files = array_filter( $files, function( $file ) use ( $filter_by_month ) {
+				return $file->get_date()->format( 'mY' ) === $filter_by_month;
 			} );
 		}
 
 		// Map the files to an array of items.
-		$items = array_map( function( $filename ) {
-			$parsed_file = new FilenameDumpParser( $filename );
-
+		$items = array_map( function( $file ) {
 			return [
-				'filename'   => $parsed_file->get_filename(),
-				'date_added' => $parsed_file->get_date(),
-				'url'        => $parsed_file->get_download_url(),
+				'filename'   => $file->get_filename(),
+				'date_added' => $file->get_date(),
+				'url'        => $file->get_download_url(),
 			];
 		}, $files );
 
@@ -315,12 +316,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 		];
 
 		// Get count of all files.
-		$files = $this->items;
-		$files = array_map( function( $file ) {
-			return new FilenameDumpParser( $file['filename'] ?? '' );
-		}, $files );
-
-		// Get the count of files for each link.
+		$files = $this->get_all_items();
 		$links = array_combine( $links, $links );
 		$links = array_map( function( $link ) use ( $files ) {
 			if ( $link === 'all' ) return count( $files );
