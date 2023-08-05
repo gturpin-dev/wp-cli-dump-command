@@ -118,7 +118,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 		} );
 		
 		$select = new HTML_Select( [
-			'all' => 'All',
+			'all' => 'All Months',
 			...$months,
 		] );
 		$select->set_selected( $filter_by_month );
