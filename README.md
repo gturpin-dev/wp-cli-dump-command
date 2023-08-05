@@ -44,5 +44,5 @@ Todos
 SECURITY
 - [ ] Check if it's possible to get the link of the dump file by guessing the name and download it
   - [ ] If yes, try to find a way to prevent it
-  - [ ] Maybe need to change the way to download the file from the admin area
+  - [x] Maybe need to change the way to download the file from the admin area
 - [ ] When the plugin is deleted, delete all the dumps ( Not on deactivation to prevent bad behavior )

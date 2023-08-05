@@ -109,7 +109,6 @@ final class FilenameDumpParser {
 		);
 	}
 
-
 	/**
 	 * Getters and setters
 	 */

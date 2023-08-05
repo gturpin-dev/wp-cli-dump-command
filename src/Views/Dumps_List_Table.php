@@ -5,6 +5,7 @@ namespace WPCLI_DumpCommand\Views;
 use WPCLI_DumpCommand\Export\ExportFile;
 use WPCLI_DumpCommand\Utils\FilenameDumpParser;
 use WPCLI_DumpCommand\Admin\OptionPages\CustomDumps;
+use WPCLI_DumpCommand\Utils\Markup\HTML_Select;
 
 // require WP_List_Table
 if ( ! class_exists( 'WP_List_Table' ) ) {
@@ -89,6 +90,48 @@ final class Dumps_List_Table extends \WP_List_Table {
 
 		// Redirect to the option page.
 		wp_safe_redirect( admin_url( 'admin.php?page=' . CustomDumps::PAGE_SLUG ) );
+	}
+
+	/**
+	 * Displays extra controls between bulk actions and pagination.
+	 *
+	 * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
+	 *
+	 * @return void
+	 */
+	protected function extra_tablenav( $which ): void {
+		// Bail if not top
+		if ( $which !== 'top' ) return;
+
+		
+		// Fill the select with the months and years
+		$filter_by_month = $_REQUEST['filter_by_month'] ?? 'all';
+		$months          = [];
+
+		// Bail if the dump directory does not exist.
+		if ( ! is_dir( ExportFile::EXPORT_PATH ) ) return;
+
+		$files = scandir( ExportFile::EXPORT_PATH, SCANDIR_SORT_DESCENDING );
+		$files = array_diff( $files, [ '.', '..' ] );
+		$dates = array_map( fn ( $filename ) => ( new FilenameDumpParser( $filename ) )->get_date(), $files );
+
+		array_walk( $dates, function ( $datetime ) use ( &$months ) {
+			$month    = $datetime->format( 'mY' );
+			$label    = $datetime->format( 'F Y' );
+
+			$months[ $month ] = $label;
+		} );
+		
+		$select = new HTML_Select( [
+			'all' => 'All',
+			...$months,
+		] );
+		$select->set_selected( $filter_by_month );
+
+		echo '<div class="alignleft actions">';
+		echo $select->build( 'filter_by_month' );
+		echo get_submit_button( 'Filter', 'secondary', null, false );
+		echo '</div>';
 	}
 
 	/**
@@ -209,6 +252,16 @@ final class Dumps_List_Table extends \WP_List_Table {
 			} );
 		}
 
+		// Filter the files by the month filter if set.
+		$filter_by_month = $_REQUEST['filter_by_month'] ?? 'all';
+		if ( ! empty( $filter_by_month ) && $filter_by_month !== 'all' ) {
+			$files = array_filter( $files, function( $filename ) use ( $filter_by_month ) {
+				$parsed_file = new FilenameDumpParser( $filename );
+				
+				return $parsed_file->get_date()->format( 'mY' ) === $filter_by_month;
+			} );
+		}
+
 		// Map the files to an array of items.
 		$items = array_map( function( $filename ) {
 			$parsed_file = new FilenameDumpParser( $filename );
@@ -232,7 +285,7 @@ final class Dumps_List_Table extends \WP_List_Table {
 	 */
     public function get_bulk_actions() {
 		$actions = [
-			'download' => __( 'Download', 'wp-cli-dump-command' ), // @TODO Maybe to remove
+			// 'download' => __( 'Download', 'wp-cli-dump-command' ), // @TODO Maybe to remove
 			'delete'   => __( 'Delete', 'wp-cli-dump-command' ),
 		];
 
